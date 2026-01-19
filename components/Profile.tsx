@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+
+import React, { useState, useRef } from 'react';
 import { UserProfile, AppTheme } from '../types';
 import { Icons } from '../constants';
 
 interface ProfileProps {
   profile: UserProfile;
   onUpdate: (newProfile: UserProfile) => void;
+  onExport: () => void;
+  onImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const THEMES: { id: AppTheme; name: string; color: string }[] = [
@@ -12,9 +15,10 @@ const THEMES: { id: AppTheme; name: string; color: string }[] = [
   { id: 'retro', name: 'Retro', color: 'bg-emerald-500' },
 ];
 
-export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate }) => {
+export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate, onExport, onImport }) => {
   const [formData, setFormData] = useState<UserProfile>(profile);
   const [isSaved, setIsSaved] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +30,7 @@ export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate }) => {
   const selectTheme = (themeId: AppTheme) => {
     const updated = { ...formData, theme: themeId };
     setFormData(updated);
-    onUpdate(updated); // Instant update for themes
+    onUpdate(updated);
   };
 
   return (
@@ -117,6 +121,45 @@ export const Profile: React.FC<ProfileProps> = ({ profile, onUpdate }) => {
             </button>
           </div>
         </form>
+      </div>
+
+      {/* Data Management Section */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden glass-card">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+          <div className="text-primary">
+            <Icons.Database />
+          </div>
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Data & Backup</h3>
+        </div>
+        <div className="p-8 space-y-6">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Your data is currently stored locally on this device. Download a backup to prevent data loss or to move your data to another browser.
+          </p>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button 
+              onClick={onExport}
+              className="flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
+            >
+              <Icons.Download />
+              Download Backup
+            </button>
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
+            >
+              <Icons.Upload />
+              Restore from File
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={onImport} 
+              accept=".json" 
+              className="hidden" 
+            />
+          </div>
+        </div>
       </div>
 
       <div className="bg-slate-100 dark:bg-slate-900/50 rounded-2xl p-6 text-center glass-card border-dashed border-2 border-slate-200 dark:border-slate-800">

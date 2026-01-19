@@ -58,12 +58,11 @@
             font-family: 'Space Mono', monospace;
         }
 
-        /* 2. Retro LIGHT MODE (Html lacks .dark) */
+        /* 2. Retro LIGHT MODE */
         html:not(.dark) body.theme-retro {
             background-color: #f1f5f9;
-            --primary-color: #059669; /* Emerald for Retro vibe */
+            --primary-color: #059669;
             --primary-hover: #047857;
-            color: #000000;
         }
 
         html:not(.dark) body.theme-retro .glass-card {
@@ -73,23 +72,23 @@
             border-radius: 0;
         }
 
-        /* Force Black text in Retro Light */
+        /* Force Black text in Retro Light - Very broad to catch everything */
         html:not(.dark) body.theme-retro h1, 
         html:not(.dark) body.theme-retro h2, 
         html:not(.dark) body.theme-retro h3, 
         html:not(.dark) body.theme-retro h4, 
         html:not(.dark) body.theme-retro p, 
         html:not(.dark) body.theme-retro span, 
-        html:not(.dark) body.theme-retro label {
+        html:not(.dark) body.theme-retro label,
+        html:not(.dark) body.theme-retro div {
             color: #000000 !important;
         }
 
-        /* 3. Retro DARK MODE (Html has .dark) */
+        /* 3. Retro DARK MODE */
         html.dark body.theme-retro {
             background-color: #0f172a !important;
-            --primary-color: #10b981; /* Brighter Emerald for Dark */
+            --primary-color: #10b981;
             --primary-hover: #059669;
-            color: #ffffff;
         }
 
         html.dark body.theme-retro .glass-card {
@@ -99,35 +98,41 @@
             border-radius: 0;
         }
 
-        /* Force White text in Retro Dark */
+        /* Force White text in Retro Dark - Overriding Tailwind classes explicitly */
         html.dark body.theme-retro h1, 
         html.dark body.theme-retro h2, 
         html.dark body.theme-retro h3, 
         html.dark body.theme-retro h4, 
         html.dark body.theme-retro p, 
         html.dark body.theme-retro span, 
-        html.dark body.theme-retro label {
+        html.dark body.theme-retro label,
+        html.dark body.theme-retro div:not(.bg-primary *) {
             color: #ffffff !important;
         }
 
-        /* Special overrides for Status Indicators in Dark Retro */
-        html.dark body.theme-retro .text-emerald-700 { color: #10b981 !important; }
-        html.dark body.theme-retro .text-red-700 { color: #ef4444 !important; }
-        html.dark body.theme-retro .text-blue-700 { color: #3b82f6 !important; }
-        html.dark body.theme-retro .text-amber-700 { color: #f59e0b !important; }
-        
-        /* Sidebar Icons/Text in Dark Retro */
+        /* Sidebar Item Overrides */
         html.dark body.theme-retro aside button {
             color: #ffffff !important;
         }
         html.dark body.theme-retro aside button.bg-primary\/10 {
-            background-color: rgba(16, 185, 129, 0.1) !important;
+            background-color: rgba(16, 185, 129, 0.15) !important;
             color: #10b981 !important;
         }
 
-        /* Ensure primary buttons always have white text */
+        /* Button content should stay white */
         .bg-primary, .bg-primary * {
             color: #ffffff !important;
+        }
+        
+        /* Specific status indicators */
+        html.dark body.theme-retro .text-emerald-700 { color: #34d399 !important; }
+        html.dark body.theme-retro .text-red-700 { color: #f87171 !important; }
+        html.dark body.theme-retro .text-blue-700 { color: #60a5fa !important; }
+        html.dark body.theme-retro .text-amber-700 { color: #fbbf24 !important; }
+
+        /* Status bar in footer */
+        html.dark body.theme-retro .bg-slate-800\/50 p {
+            color: #94a3b8 !important;
         }
     </style>
 <script type="importmap">

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
@@ -41,8 +42,6 @@ const App: React.FC = () => {
       try {
         const parsed = JSON.parse(saved);
         setSubjects(parsed.subjects || []);
-        
-        // Ensure the loaded theme is valid, otherwise fallback to modern
         const theme = parsed.profile?.theme === 'retro' ? 'retro' : 'modern';
         setProfile({
           ...INITIAL_PROFILE,
@@ -68,9 +67,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (isLoaded) {
       const body = document.body;
-      const themes: AppTheme[] = ['modern', 'retro'];
-      // Remove all theme classes first
-      body.classList.remove('theme-modern', 'theme-notebook', 'theme-bullet', 'theme-retro', 'theme-midnight');
+      body.classList.remove('theme-modern', 'theme-retro');
       body.classList.add(`theme-${profile.theme}`);
     }
   }, [profile.theme, isLoaded]);
@@ -119,6 +116,46 @@ const App: React.FC = () => {
     }
   };
 
+  const exportData = () => {
+    const data = JSON.stringify({ subjects, profile }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `attendly_backup_${formatDate(new Date())}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const importData = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const result = event.target?.result as string;
+        const parsed = JSON.parse(result);
+        
+        if (parsed.subjects && parsed.profile) {
+          if (window.confirm("This will overwrite your current attendance. Continue?")) {
+            setSubjects(parsed.subjects);
+            setProfile(parsed.profile);
+            alert("Data restored successfully!");
+          }
+        } else {
+          alert("Invalid backup file format.");
+        }
+      } catch (err) {
+        alert("Failed to parse the backup file.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset input
+  };
+
   if (!isLoaded) return null;
 
   return (
@@ -136,6 +173,8 @@ const App: React.FC = () => {
           <Profile 
             profile={profile}
             onUpdate={setProfile}
+            onExport={exportData}
+            onImport={importData}
           />
         )}
       </Layout>
