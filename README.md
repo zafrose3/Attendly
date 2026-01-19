@@ -2,8 +2,6 @@
 
 Attendly is a sleek, responsive, and feature-rich web application designed to help students track their class attendance with precision. It doesn't just count days; it provides actionable insights like how many classes you can "safely skip" or how many you "must attend" to reach your target percentage.
 
-![Attendly Dashboard Placeholder](https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=1000)
-
 ## ✨ Features
 
 - **🎯 Smart Goal Tracking**: Set a target percentage (e.g., 75%) and get real-time feedback on your standing.
@@ -20,17 +18,10 @@ Attendly is a sleek, responsive, and feature-rich web application designed to he
 - **TypeScript**: Robust type-checking for attendance logic and state management.
 - **ES Modules**: Fast, lightweight loading via ESM.sh.
 
-
 The attendance logic follows these rules:
 - **Attendance % Formula**: `(Present + OD) / (Present + Absent + OD) * 100`
 - **Sundays**: Automatically handled. Marking "Absent" on a Sunday does not penalize your percentage (ideal for tracking personal study schedules).
 - **On Duty (OD)**: Recognized as "Attended" for the percentage calculation but labeled as OD for record-keeping.
-
-## 📸 Screenshots
-
-| Modern Dark Mode | Retro Light Mode |
-| :---: | :---: |
-| ![Modern Dark](https://via.placeholder.com/400x250?text=Modern+Dark+Mode) | ![Retro Light](https://via.placeholder.com/400x250?text=Retro+Light+Mode) |
 
 ---
 
