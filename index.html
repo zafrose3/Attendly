@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendly - Attendance Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                DEFAULT: 'var(--primary-color)',
+                hover: 'var(--primary-hover)',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* --- GLOBAL & MODERN THEME --- */
+        :root {
+            --primary-color: #2563eb; /* Blue 600 */
+            --primary-hover: #1d4ed8;
+        }
+
+        /* Dark Mode Accent: Dark Yellow (Amber) for Modern Theme */
+        html.dark {
+            --primary-color: #f59e0b; /* Amber 500 */
+            --primary-hover: #d97706; /* Amber 600 */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        html.dark .glass-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- RETRO THEME CONFIG --- */
+        
+        /* 1. Base Retro Font */
+        body.theme-retro {
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* 2. Retro LIGHT MODE (Html lacks .dark) */
+        html:not(.dark) body.theme-retro {
+            background-color: #f1f5f9;
+            --primary-color: #059669; /* Emerald for Retro vibe */
+            --primary-hover: #047857;
+            color: #000000;
+        }
+
+        html:not(.dark) body.theme-retro .glass-card {
+            background: #ffffff;
+            border: 3px solid var(--primary-color);
+            box-shadow: 4px 4px 0px var(--primary-color);
+            border-radius: 0;
+        }
+
+        /* Force Black text in Retro Light */
+        html:not(.dark) body.theme-retro h1, 
+        html:not(.dark) body.theme-retro h2, 
+        html:not(.dark) body.theme-retro h3, 
+        html:not(.dark) body.theme-retro h4, 
+        html:not(.dark) body.theme-retro p, 
+        html:not(.dark) body.theme-retro span, 
+        html:not(.dark) body.theme-retro label {
+            color: #000000 !important;
+        }
+
+        /* 3. Retro DARK MODE (Html has .dark) */
+        html.dark body.theme-retro {
+            background-color: #0f172a !important;
+            --primary-color: #10b981; /* Brighter Emerald for Dark */
+            --primary-hover: #059669;
+            color: #ffffff;
+        }
+
+        html.dark body.theme-retro .glass-card {
+            background: #1e293b !important;
+            border: 3px solid var(--primary-color) !important;
+            box-shadow: 6px 6px 0px var(--primary-color) !important;
+            border-radius: 0;
+        }
+
+        /* Force White text in Retro Dark */
+        html.dark body.theme-retro h1, 
+        html.dark body.theme-retro h2, 
+        html.dark body.theme-retro h3, 
+        html.dark body.theme-retro h4, 
+        html.dark body.theme-retro p, 
+        html.dark body.theme-retro span, 
+        html.dark body.theme-retro label {
+            color: #ffffff !important;
+        }
+
+        /* Special overrides for Status Indicators in Dark Retro */
+        html.dark body.theme-retro .text-emerald-700 { color: #10b981 !important; }
+        html.dark body.theme-retro .text-red-700 { color: #ef4444 !important; }
+        html.dark body.theme-retro .text-blue-700 { color: #3b82f6 !important; }
+        html.dark body.theme-retro .text-amber-700 { color: #f59e0b !important; }
+        
+        /* Sidebar Icons/Text in Dark Retro */
+        html.dark body.theme-retro aside button {
+            color: #ffffff !important;
+        }
+        html.dark body.theme-retro aside button.bg-primary\/10 {
+            background-color: rgba(16, 185, 129, 0.1) !important;
+            color: #10b981 !important;
+        }
+
+        /* Ensure primary buttons always have white text */
+        .bg-primary, .bg-primary * {
+            color: #ffffff !important;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
