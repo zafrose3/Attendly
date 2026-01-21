@@ -7,19 +7,16 @@ export const getAttendanceStats = (subject: Subject) => {
   let od = 0;
   let holiday = 0;
 
-  Object.entries(subject.history).forEach(([dateStr, status]) => {
+  Object.entries(subject.history).forEach(([dateStr, statuses]) => {
     const date = new Date(dateStr);
     const isSunday = date.getDay() === 0;
 
-    // If it's a sunday, user said mark absent but don't affect percentage.
-    // However, if the user explicitly marked it as something else, we might respect that?
-    // User request: "mark absent on sundays and still not affect the percentage".
-    // This implies Sundays are tracked but ignored in calculations.
-    
-    if (status === 'PRESENT') present++;
-    else if (status === 'ABSENT' && !isSunday) absent++;
-    else if (status === 'OD') od++;
-    else if (status === 'HOLIDAY') holiday++;
+    statuses.forEach(status => {
+      if (status === 'PRESENT') present++;
+      else if (status === 'ABSENT' && !isSunday) absent++;
+      else if (status === 'OD') od++;
+      else if (status === 'HOLIDAY') holiday++;
+    });
   });
 
   const total = present + absent + od;

@@ -3,11 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { Profile } from './components/Profile';
-import { Subject, UserProfile, AttendanceStatus, AppTheme } from './types';
+import { Subject, UserProfile, AttendanceStatus } from './types';
 import { formatDate } from './utils/attendance';
 import { Icons } from './constants';
 
-const LOCAL_STORAGE_KEY = 'attendly_data_v3';
+const LOCAL_STORAGE_KEY = 'attendly_data_v4'; // Bump version for schema change
 const THEME_MODE_KEY = 'attendly_theme_mode';
 
 const INITIAL_PROFILE: UserProfile = {
@@ -25,7 +25,6 @@ const App: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
-  // Load theme mode and data
   useEffect(() => {
     const savedMode = localStorage.getItem(THEME_MODE_KEY);
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -35,26 +34,28 @@ const App: React.FC = () => {
     if (isDark) document.documentElement.classList.add('dark');
 
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    const legacyV2 = localStorage.getItem('attendly_data_v2');
-    const legacyX = localStorage.getItem('attendx_data_v2');
+    const legacyV3 = localStorage.getItem('attendly_data_v3');
 
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         setSubjects(parsed.subjects || []);
-        const theme = parsed.profile?.theme === 'retro' ? 'retro' : 'modern';
-        setProfile({
-          ...INITIAL_PROFILE,
-          ...(parsed.profile || {}),
-          theme
-        });
+        setProfile({ ...INITIAL_PROFILE, ...(parsed.profile || {}) });
       } catch (e) {
         console.error("Failed to parse storage", e);
       }
-    } else if (legacyV2 || legacyX) {
+    } else if (legacyV3) {
+      // Migrate from single status to array
       try {
-        const parsed = JSON.parse((legacyV2 || legacyX)!);
-        setSubjects(parsed.subjects || []);
+        const parsed = JSON.parse(legacyV3);
+        const migratedSubjects = (parsed.subjects || []).map((s: any) => {
+          const newHistory: Record<string, AttendanceStatus[]> = {};
+          Object.entries(s.history || {}).forEach(([date, status]) => {
+            newHistory[date] = [status as AttendanceStatus];
+          });
+          return { ...s, history: newHistory };
+        });
+        setSubjects(migratedSubjects);
         setProfile({ ...INITIAL_PROFILE, ...(parsed.profile || {}) });
       } catch (e) {
         console.error("Migration failed", e);
@@ -63,18 +64,11 @@ const App: React.FC = () => {
     setIsLoaded(true);
   }, []);
 
-  // Apply visual theme to body
   useEffect(() => {
     if (isLoaded) {
       const body = document.body;
       body.classList.remove('theme-modern', 'theme-retro');
       body.classList.add(`theme-${profile.theme}`);
-    }
-  }, [profile.theme, isLoaded]);
-
-  // Sync to Storage
-  useEffect(() => {
-    if (isLoaded) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ subjects, profile }));
     }
   }, [subjects, profile, isLoaded]);
@@ -82,36 +76,51 @@ const App: React.FC = () => {
   const toggleDarkMode = () => {
     const next = !darkMode;
     setDarkMode(next);
-    const modeStr = next ? 'dark' : 'light';
-    localStorage.setItem(THEME_MODE_KEY, modeStr);
+    localStorage.setItem(THEME_MODE_KEY, next ? 'dark' : 'light');
     if (next) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
   };
 
-  const handleUpdateAttendance = (id: string, status: AttendanceStatus, date?: string) => {
+  const handleUpdateAttendance = (id: string, status: AttendanceStatus, date?: string, index?: number) => {
     const dateStr = date || formatDate(new Date());
     setSubjects(prev => prev.map(sub => {
       if (sub.id !== id) return sub;
       const newHistory = { ...sub.history };
-      if (status === 'NONE') delete newHistory[dateStr];
-      else newHistory[dateStr] = status;
+      const daySessions = [...(newHistory[dateStr] || [])];
+
+      if (index !== undefined) {
+        // Edit or Remove specific slot
+        if (status === 'NONE') {
+          daySessions.splice(index, 1);
+        } else {
+          daySessions[index] = status;
+        }
+      } else {
+        // Add new slot (Quick Action or Calendar Add)
+        if (status !== 'NONE') {
+          daySessions.push(status);
+        }
+      }
+
+      if (daySessions.length === 0) delete newHistory[dateStr];
+      else newHistory[dateStr] = daySessions;
+
       return { ...sub, history: newHistory, lastUpdated: Date.now() };
     }));
   };
 
   const handleAddSubject = (name: string, target: number) => {
-    const newSub: Subject = {
+    setSubjects(prev => [{
       id: crypto.randomUUID(),
       name,
       target,
       history: {},
       lastUpdated: Date.now()
-    };
-    setSubjects(prev => [newSub, ...prev]);
+    }, ...prev]);
   };
 
   const handleDeleteSubject = (id: string) => {
-    if (window.confirm("Delete this subject and all its records?")) {
+    if (window.confirm("Delete this subject?")) {
       setSubjects(prev => prev.filter(sub => sub.id !== id));
     }
   };
@@ -123,37 +132,27 @@ const App: React.FC = () => {
     const link = document.createElement('a');
     link.href = url;
     link.download = `attendly_backup_${formatDate(new Date())}.json`;
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
   const importData = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const result = event.target?.result as string;
-        const parsed = JSON.parse(result);
-        
-        if (parsed.subjects && parsed.profile) {
-          if (window.confirm("This will overwrite your current attendance. Continue?")) {
-            setSubjects(parsed.subjects);
-            setProfile(parsed.profile);
-            alert("Data restored successfully!");
-          }
-        } else {
-          alert("Invalid backup file format.");
+        const parsed = JSON.parse(event.target?.result as string);
+        if (parsed.subjects && parsed.profile && window.confirm("Overwrite current data?")) {
+          setSubjects(parsed.subjects);
+          setProfile(parsed.profile);
         }
       } catch (err) {
-        alert("Failed to parse the backup file.");
+        alert("Invalid backup file.");
       }
     };
     reader.readAsText(file);
-    e.target.value = ''; // Reset input
+    e.target.value = '';
   };
 
   if (!isLoaded) return null;
@@ -178,11 +177,9 @@ const App: React.FC = () => {
           />
         )}
       </Layout>
-
       <button
         onClick={toggleDarkMode}
         className="fixed bottom-6 right-6 z-[100] p-4 rounded-full bg-white dark:bg-slate-800 text-primary shadow-2xl border border-slate-200 dark:border-slate-700 hover:scale-110 active:scale-95 transition-all duration-300"
-        aria-label="Toggle dark mode"
       >
         {darkMode ? <Icons.Sun /> : <Icons.Moon />}
       </button>

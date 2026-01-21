@@ -1,11 +1,12 @@
+
 import React from 'react';
-import { Subject, ActionType } from '../types';
+import { Subject, AttendanceStatus } from '../types';
 import { Icons } from '../constants';
 import { getAttendanceStats } from '../utils/attendance';
 
 interface SubjectCardProps {
   subject: Subject;
-  onUpdate: (id: string, action: ActionType) => void;
+  onUpdate: (id: string, status: AttendanceStatus) => void;
   onDelete: (id: string) => void;
   onOpenCalendar: (id: string) => void;
 }
@@ -16,26 +17,26 @@ export const SubjectCard: React.FC<SubjectCardProps> = ({ subject, onUpdate, onD
   const isSafe = percentage >= subject.target;
 
   const getStatusText = () => {
-    if (total === 0) return "Start tracking today!";
+    if (total === 0) return "Add today's classes below!";
     if (percentage < subject.target) {
-      let currentAttended = attended;
-      let currentTotal = total;
+      let currAttended = attended;
+      let currTotal = total;
       let count = 0;
-      while ((currentAttended / currentTotal) * 100 < subject.target) {
-        currentAttended++;
-        currentTotal++;
+      while ((currAttended / currTotal) * 100 < subject.target) {
+        currAttended++;
+        currTotal++;
         count++;
       }
-      return `Attend ${count} more classes to reach ${subject.target}%`;
+      return `Attend ${count} more to reach ${subject.target}%`;
     } else {
-      let currentAttended = attended;
-      let currentTotal = total;
+      let currAttended = attended;
+      let currTotal = total;
       let count = 0;
-      while (((currentAttended) / (currentTotal + 1)) * 100 >= subject.target) {
-        currentTotal++;
+      while (((currAttended) / (currTotal + 1)) * 100 >= subject.target) {
+        currTotal++;
         count++;
       }
-      return count === 0 ? "You are exactly at your target." : `Safe to skip ${count} more classes.`;
+      return count === 0 ? "You are at your target limit." : `Safe to skip ${count} more classes.`;
     }
   };
 
@@ -83,11 +84,12 @@ export const SubjectCard: React.FC<SubjectCardProps> = ({ subject, onUpdate, onD
       </div>
 
       <div className="grid grid-cols-4 gap-1.5">
-        <AttendanceButton label="Pres" count={present} color="emerald" onClick={() => onUpdate(subject.id, 'PRESENT')} />
-        <AttendanceButton label="Abs" count={absent} color="red" onClick={() => onUpdate(subject.id, 'ABSENT')} />
-        <AttendanceButton label="OD" count={od} color="blue" onClick={() => onUpdate(subject.id, 'OD')} />
-        <AttendanceButton label="Hol" count={holiday} color="amber" onClick={() => onUpdate(subject.id, 'HOLIDAY')} />
+        <AttendanceButton label="Add Pres" count={present} color="emerald" onClick={() => onUpdate(subject.id, 'PRESENT')} />
+        <AttendanceButton label="Add Abs" count={absent} color="red" onClick={() => onUpdate(subject.id, 'ABSENT')} />
+        <AttendanceButton label="Add OD" count={od} color="blue" onClick={() => onUpdate(subject.id, 'OD')} />
+        <AttendanceButton label="Add Hol" count={holiday} color="amber" onClick={() => onUpdate(subject.id, 'HOLIDAY')} />
       </div>
+      <p className="text-[9px] text-center text-slate-400 mt-2 font-bold uppercase tracking-widest">Add class for today</p>
     </div>
   );
 };
@@ -99,10 +101,10 @@ const AttendanceButton: React.FC<{
   onClick: () => void;
 }> = ({ label, count, color, onClick }) => {
   const colorMap = {
-    emerald: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 active:scale-95',
-    red: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 active:scale-95',
-    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 active:scale-95',
-    amber: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 active:scale-95'
+    emerald: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 active:scale-95',
+    red: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 active:scale-95',
+    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 active:scale-95',
+    amber: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 active:scale-95'
   };
 
   return (

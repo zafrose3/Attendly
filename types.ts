@@ -1,3 +1,4 @@
+
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'OD' | 'HOLIDAY' | 'NONE';
 
 export type AppTheme = 'modern' | 'retro';
@@ -7,8 +8,8 @@ export interface Subject {
   name: string;
   target: number;
   lastUpdated: number;
-  // Key is YYYY-MM-DD
-  history: Record<string, AttendanceStatus>;
+  // Key is YYYY-MM-DD, Value is array of statuses for multiple classes
+  history: Record<string, AttendanceStatus[]>;
 }
 
 export interface UserProfile {
