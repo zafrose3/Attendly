@@ -2,7 +2,7 @@
 import React from 'react';
 import { Subject, AttendanceStatus } from '../types';
 import { Icons } from '../constants';
-import { getAttendanceStats } from '../utils/attendance';
+import { getAttendanceStats, formatDate } from '../utils/attendance';
 
 interface SubjectCardProps {
   subject: Subject;
@@ -14,6 +14,12 @@ interface SubjectCardProps {
 export const SubjectCard: React.FC<SubjectCardProps> = ({ subject, onUpdate, onDelete, onOpenCalendar }) => {
   const { present, absent, od, holiday, percentage, total, attended } = getAttendanceStats(subject);
   
+  // Calculate Today's sessions
+  const todayStr = formatDate(new Date());
+  const todaySessions = subject.history[todayStr] || [];
+  const todayAttended = todaySessions.filter(s => s === 'PRESENT' || s === 'OD').length;
+  const todayTotal = todaySessions.filter(s => s !== 'HOLIDAY').length;
+
   const isSafe = percentage >= subject.target;
 
   const getStatusText = () => {
@@ -64,10 +70,24 @@ export const SubjectCard: React.FC<SubjectCardProps> = ({ subject, onUpdate, onD
         </div>
       </div>
 
-      <div className="flex items-end gap-3 mb-6">
-        <span className="text-3xl font-black text-slate-900 dark:text-white">{percentage.toFixed(1)}%</span>
-        <div className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase mb-1.5 ${isSafe ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
-          {isSafe ? 'Healthy' : 'Warning'}
+      <div className="flex items-end justify-between mb-6">
+        <div className="flex items-end gap-3">
+          <span className="text-3xl font-black text-slate-900 dark:text-white">{percentage.toFixed(1)}%</span>
+          <div className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase mb-1.5 ${isSafe ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
+            {isSafe ? 'Healthy' : 'Warning'}
+          </div>
+        </div>
+      </div>
+
+      {/* Detailed Stats Panel */}
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Today</p>
+          <p className="text-xl font-black text-slate-800 dark:text-white">{todayAttended}<span className="text-slate-400 dark:text-slate-600 text-sm font-bold">/{todayTotal}</span></p>
+        </div>
+        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Total</p>
+          <p className="text-xl font-black text-slate-800 dark:text-white">{attended}<span className="text-slate-400 dark:text-slate-600 text-sm font-bold">/{total}</span></p>
         </div>
       </div>
 
@@ -84,12 +104,12 @@ export const SubjectCard: React.FC<SubjectCardProps> = ({ subject, onUpdate, onD
       </div>
 
       <div className="grid grid-cols-4 gap-1.5">
-        <AttendanceButton label="Add Pres" count={present} color="emerald" onClick={() => onUpdate(subject.id, 'PRESENT')} />
-        <AttendanceButton label="Add Abs" count={absent} color="red" onClick={() => onUpdate(subject.id, 'ABSENT')} />
-        <AttendanceButton label="Add OD" count={od} color="blue" onClick={() => onUpdate(subject.id, 'OD')} />
-        <AttendanceButton label="Add Hol" count={holiday} color="amber" onClick={() => onUpdate(subject.id, 'HOLIDAY')} />
+        <AttendanceButton label="Pres" count={todaySessions.filter(s => s === 'PRESENT').length} color="emerald" onClick={() => onUpdate(subject.id, 'PRESENT')} />
+        <AttendanceButton label="Abs" count={todaySessions.filter(s => s === 'ABSENT').length} color="red" onClick={() => onUpdate(subject.id, 'ABSENT')} />
+        <AttendanceButton label="OD" count={todaySessions.filter(s => s === 'OD').length} color="blue" onClick={() => onUpdate(subject.id, 'OD')} />
+        <AttendanceButton label="Hol" count={todaySessions.filter(s => s === 'HOLIDAY').length} color="amber" onClick={() => onUpdate(subject.id, 'HOLIDAY')} />
       </div>
-      <p className="text-[9px] text-center text-slate-400 mt-2 font-bold uppercase tracking-widest">Add class for today</p>
+      <p className="text-[9px] text-center text-slate-400 mt-2 font-bold uppercase tracking-widest">Add session for today</p>
     </div>
   );
 };

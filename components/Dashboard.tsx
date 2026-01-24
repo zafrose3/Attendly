@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Subject, ActionType, UserProfile, AttendanceStatus } from '../types';
 import { SubjectCard } from './SubjectCard';
@@ -8,7 +9,7 @@ import { getAttendanceStats } from '../utils/attendance';
 interface DashboardProps {
   subjects: Subject[];
   profile: UserProfile;
-  onUpdateAttendance: (id: string, action: AttendanceStatus, date?: string) => void;
+  onUpdateAttendance: (id: string, action: AttendanceStatus, date?: string, index?: number) => void;
   onAddSubject: (name: string, target: number) => void;
   onDeleteSubject: (id: string) => void;
 }
@@ -165,7 +166,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {selectedSubject && (
         <CalendarView 
           subject={selectedSubject}
-          onUpdateDate={(date, status) => onUpdateAttendance(selectedSubjectId!, status, date)}
+          onUpdateDate={(date, status, index) => onUpdateAttendance(selectedSubjectId!, status, date, index)}
           onClose={() => setSelectedSubjectId(null)}
         />
       )}
