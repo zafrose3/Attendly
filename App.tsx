@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { Profile } from './components/Profile';
@@ -183,6 +184,7 @@ const App: React.FC = () => {
       >
         {darkMode ? <Icons.Sun /> : <Icons.Moon />}
       </button>
+      <Analytics />
     </div>
   );
 };
